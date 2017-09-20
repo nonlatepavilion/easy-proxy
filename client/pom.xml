@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>eaf-proxy</artifactId>
+        <groupId>io.terminus.eaf.gal.proxy</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>client</artifactId>
+
+    <properties>
+        <!-- 1、编译插件 -->
+        <maven-compiler-plugin.version>3.2</maven-compiler-plugin.version>
+        <!-- 2、源码打包插件 -->
+        <maven-source-plugin.version>2.4</maven-source-plugin.version>
+        <!-- 3、JavaDoc打包插件 -->
+        <maven-javadoc-plugin.version>2.10.3</maven-javadoc-plugin.version>
+        <!-- 4、 依赖Jar包打包插件（用于将Java应用相关依赖打包到指定目录） -->
+        <maven-dependency-plugin>2.8</maven-dependency-plugin>
+        <!-- 5、可执行Jar包打包插件（用于将Java应用打包成可执行Jar包） -->
+        <maven-jar-plugin>2.6</maven-jar-plugin>
+
+        <slf4j.version>1.7.13</slf4j.version>
+
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 其他属性 -->
+        <jdk.version>1.8</jdk.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.terminus.eaf.gal.proxy</groupId>
+            <artifactId>server</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- slf4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <!-- log4j impl slf4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <!-- 代码直接调用commons-logging会被桥接到slf4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+    </dependencies>
+
+
+    <build>
+        <finalName>HttpProxyClient</finalName>
+
+        <plugins>
+            <!-- 编译插件（用于设定JDK版本） -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <!-- 源代码使用的开发版本 -->
+                    <source>${jdk.version}</source>
+                    <!-- 需要生成的目标class文件的编译版本 -->
+                    <!-- 一般target与source保持一致.但有时为了让程序能在其他版本的jdk中运行(对于低版本目标jdk，源代码中需要没有使用低版本jdk中不支持的语法)，会存在target不同于source的情况 -->
+                    <target>${jdk.version}</target>
+                    <showWarnings>true</showWarnings>
+                </configuration>
+            </plugin>
+
+            <!-- 依赖Jar包打包插件（用于将Java应用相关依赖打包到指定目录） -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>${maven-dependency-plugin}</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <!-- 指定依赖打包的输出目录 -->
+                            <outputDirectory>${project.build.directory}/libs</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                            <includeScope>compile</includeScope>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 可执行Jar包打包插件（用于将Java应用打包成可执行Jar包） -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin}</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <!-- 指定程序入口 -->
+                            <mainClass>io.terminus.eaf.gal.proxy.client.HttpProxyClientMain</mainClass>
+                            <addClasspath>true</addClasspath>
+                            <!-- 指定classpath路径 -->
+                            <classpathPrefix>libs/</classpathPrefix>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
